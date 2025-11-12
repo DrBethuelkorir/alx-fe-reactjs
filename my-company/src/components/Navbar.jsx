@@ -9,7 +9,8 @@ const Navbar = () => {
     marginTop : "10px" ,
     listStyle : 'none' ,
     justifyContent : 'center',
-    alignItems : 'center'
+    alignItems : 'center',
+    backgroundColor : 'white'
   }
   return (
     <div>
