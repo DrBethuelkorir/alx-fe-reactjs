@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useRecipeStore } from './recipeStore'
 
 const RecipeList = ({ onViewRecipe, onEditRecipe }) => {
@@ -34,7 +35,10 @@ const RecipeList = ({ onViewRecipe, onEditRecipe }) => {
           {displayRecipes.map((recipe) => (
             <div key={recipe.id} className="recipe-card">
               <div className="recipe-content">
-                <h3>{recipe.title}</h3>
+                {/* Use Link for navigation to recipe details */}
+                <Link to={`/recipe/${recipe.id}`} className="recipe-title-link">
+                  <h3>{recipe.title}</h3>
+                </Link>
                 <p>{recipe.description}</p>
                 {recipe.ingredients && (
                   <div className="recipe-ingredients">
@@ -50,19 +54,26 @@ const RecipeList = ({ onViewRecipe, onEditRecipe }) => {
               </div>
               
               <div className="recipe-actions">
-                <button 
-                  onClick={() => onViewRecipe(recipe.id)}
-                  className="view-btn"
-                >
-                  View Details
-                </button>
+                {/* Link for View Details */}
+                <Link to={`/recipe/${recipe.id}`}>
+                  <button className="view-btn">
+                    View Details
+                  </button>
+                </Link>
                 
-                <button 
-                  onClick={() => onEditRecipe(recipe.id)}
-                  className="edit-btn"
-                >
-                  Edit
-                </button>
+                {/* Link for Edit */}
+                <Link to={`/edit/${recipe.id}`}>
+                  <button className="edit-btn">
+                    Edit
+                  </button>
+                </Link>
+                
+                {/* Optional: Link for Delete page if you have one */}
+                <Link to={`/delete`}>
+                  <button className="delete-btn">
+                    Delete
+                  </button>
+                </Link>
               </div>
             </div>
           ))}
