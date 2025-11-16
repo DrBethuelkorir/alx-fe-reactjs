@@ -5,6 +5,7 @@ import DeleteRecipeButton from './components/DeleteRecipeButton'
 import RecipeDetails from './components/RecipeDetails'
 import EditRecipeForm from './components/EditRecipeForm'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import SearchBar from './components/SearchBar'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Routes>
               <Route path='/' element={
                 <div>
+                  <SearchBar />
                   <AddRecipeForm />
                   <RecipeList />
                 </div>

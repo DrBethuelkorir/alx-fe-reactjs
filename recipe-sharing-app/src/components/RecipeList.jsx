@@ -1,21 +1,69 @@
-import { useRecipeStore } from './recipeStore.js'
+import { useRecipeStore } from './recipeStore'
 
-const RecipeList = () => {
+const RecipeList = ({ onViewRecipe, onEditRecipe }) => {
   const recipes = useRecipeStore((state) => state.recipes)
+  const filteredRecipes = useRecipeStore((state) => state.filteredRecipes)
+  const searchTerm = useRecipeStore((state) => state.searchTerm)
+
+  // Use filtered recipes when there's a search term, otherwise use all recipes
+  const displayRecipes = searchTerm ? filteredRecipes : recipes
 
   return (
     <div className="recipe-list">
-      <h2>Recipes ({recipes.length})</h2>
+      <h2>Recipes ({displayRecipes.length})</h2>
       
-      {recipes.length === 0 ? (
-        <p className="no-recipes">No recipes yet. Add your first recipe!</p>
+      {searchTerm && (
+        <div className="search-info">
+          <p>
+            Showing {filteredRecipes.length} of {recipes.length} recipes 
+            {searchTerm && ` for "${searchTerm}"`}
+          </p>
+        </div>
+      )}
+      
+      {displayRecipes.length === 0 ? (
+        <div className="no-recipes">
+          {searchTerm ? (
+            <p>No recipes found matching "{searchTerm}". Try a different search term.</p>
+          ) : (
+            <p>No recipes yet. Add your first recipe above!</p>
+          )}
+        </div>
       ) : (
         <div className="recipes-grid">
-          {recipes.map((recipe) => (
+          {displayRecipes.map((recipe) => (
             <div key={recipe.id} className="recipe-card">
-              <h3 className="recipe-title">{recipe.title}</h3>
-              <p className="recipe-description">{recipe.description}</p>
-              <div className="recipe-id">ID: {recipe.id}</div>
+              <div className="recipe-content">
+                <h3>{recipe.title}</h3>
+                <p>{recipe.description}</p>
+                {recipe.ingredients && (
+                  <div className="recipe-ingredients">
+                    <strong>Ingredients:</strong> {recipe.ingredients.join(', ')}
+                  </div>
+                )}
+                {recipe.prepTime && (
+                  <div className="recipe-prep-time">
+                    <strong>Prep Time:</strong> {recipe.prepTime}
+                  </div>
+                )}
+                <small>ID: {recipe.id}</small>
+              </div>
+              
+              <div className="recipe-actions">
+                <button 
+                  onClick={() => onViewRecipe(recipe.id)}
+                  className="view-btn"
+                >
+                  View Details
+                </button>
+                
+                <button 
+                  onClick={() => onEditRecipe(recipe.id)}
+                  className="edit-btn"
+                >
+                  Edit
+                </button>
+              </div>
             </div>
           ))}
         </div>
