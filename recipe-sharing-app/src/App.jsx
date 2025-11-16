@@ -1,6 +1,10 @@
 import RecipeList from './components/RecipeList'
 import AddRecipeForm from './components/AddRecipeForm'
 import './App.css'
+import DeleteRecipeButton from './components/DeleteRecipeButton'
+import RecipeDetails from './components/RecipeDetails'
+import EditRecipeForm from './components/EditRecipeForm'
+import {Router,Route} from 'react-router-dom'
 
 function App() {
   return (
@@ -12,8 +16,13 @@ function App() {
 
       <main className="app-main">
         <div className="container">
-          <AddRecipeForm />
-          <RecipeList />
+          <Router>
+            <Route path='/' element={<RecipeList />}></Route>
+            <Route path='' element={<DeleteRecipeButton />}></Route>
+            <Route path='' element={ <RecipeDetails />}></Route>
+            <Route path='' element={<EditRecipeForm />}></Route>
+            <AddRecipeForm />
+         </Router>
         </div>
       </main>
     </div>
