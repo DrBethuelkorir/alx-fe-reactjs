@@ -1,38 +1,27 @@
-import { useState } from "react";
-import { useRecipeStore } from './recipeStore.js'
+import { useRecipeStore } from './recipeStore'
 
-const DeleteRecipeButton = () => {
-    const deleteRecipe = useRecipeStore((state) => state.deleteRecipe)
-    const [id, setId] = useState("")
-    
-    const handleEvent = (event) => {
-        event.preventDefault()
+const DeleteRecipeButton = ({ recipeId, onDelete }) => {
+  const deleteRecipe = useRecipeStore((state) => state.deleteRecipe)
 
-        if (!id.trim()) {
-            alert("Enter ID")
-            return
-        }
-        
-        // Convert to number and call deleteRecipe
-        deleteRecipe(Number(id.trim()))
-        setId("") // Clear the input after deletion
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this recipe?')) {
+      deleteRecipe(recipeId)
+      
+      // If onDelete callback is provided, call it (for cleanup or navigation)
+      if (onDelete) {
+        onDelete()
+      }
     }
+  }
 
-    return (
-        <div>
-            <form onSubmit={handleEvent}>
-                <label htmlFor="deletion">Enter Recipe ID to Delete:</label>
-                <input
-                    id="deletion"
-                    type="text"
-                    value={id}
-                    onChange={(e) => setId(e.target.value)}
-                    placeholder="Enter recipe ID"
-                />
-                <button type="submit">Delete Recipe</button>
-            </form>
-        </div>
-    )
+  return (
+    <button 
+      onClick={handleDelete}
+      className="delete-btn"
+    >
+      Delete Recipe
+    </button>
+  )
 }
 
 export default DeleteRecipeButton
