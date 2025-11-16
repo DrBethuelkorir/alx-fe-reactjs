@@ -4,7 +4,7 @@ import './App.css'
 import DeleteRecipeButton from './components/DeleteRecipeButton'
 import RecipeDetails from './components/RecipeDetails'
 import EditRecipeForm from './components/EditRecipeForm'
-import {Router,Route} from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 function App() {
   return (
@@ -17,12 +17,18 @@ function App() {
       <main className="app-main">
         <div className="container">
           <Router>
-            <Route path='/' element={<RecipeList />}></Route>
-            <Route path='' element={<DeleteRecipeButton />}></Route>
-            <Route path='' element={ <RecipeDetails />}></Route>
-            <Route path='' element={<EditRecipeForm />}></Route>
-            <AddRecipeForm />
-         </Router>
+            <Routes>
+              <Route path='/' element={
+                <div>
+                  <AddRecipeForm />
+                  <RecipeList />
+                </div>
+              } />
+              <Route path='/delete' element={<DeleteRecipeButton />} />
+              <Route path='/recipe/:id' element={<RecipeDetails />} />
+              <Route path='/edit/:id' element={<EditRecipeForm />} />
+            </Routes>
+          </Router>
         </div>
       </main>
     </div>
