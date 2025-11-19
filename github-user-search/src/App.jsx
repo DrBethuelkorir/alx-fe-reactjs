@@ -1,6 +1,7 @@
 // src/App.jsx
-import Search from './components/Search'
+import Ssearch from './components/Ssearch'
 import './App.css'
+import Search from './components/Search'
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <p>Find GitHub users and their profiles</p>
       </header>
       <main className="app-main">
+        <Ssearch />
         <Search />
       </main>
     </div>

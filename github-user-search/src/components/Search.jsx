@@ -1,102 +1,82 @@
-// src/components/Search.jsx
-import { useState } from "react";
-import { fetchUserData } from '../services/githubService';
+import {useState } from 'react'
+import { searchUsers } from '../services/githubService'
 
 const Search = () => {
-    const [username, setUsername] = useState("");
-    const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+   const [location, setLocation] = useState("");
+   const [loading, setLoading] = useState(false); 
+   const [users, setUsers] = useState(null)  
+   const [error, setError] = useState(null)
 
-    const handleChange = (e) => {
-        setUsername(e.target.value);
-        setError(null); // Clear error when user starts typing again
-    };
+   const handleonchange = (e) =>{
+    setLocation(e.target.value);  
+    setError(null);  
+   }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!username.trim()) return;
+   const handleonsubmit = async (e) =>{
+    e.preventDefault();
+    if(!location.trim()) return
 
-        setLoading(true);
-        setError(null);
-        setUserData(null);
+    setLoading(true);        
+    setError(null);
+    setUsers(null);
 
-        try {
-            const data = await fetchUserData(username);
-            setUserData(data);
-        } catch (err) {
-            setError("Looks like we cant find the user");
-            console.error("API Error:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+        const data = await searchUsers(`location:${location}`)  
+        setUsers(data.items)   // ✅ Store the array of users
+    } catch(error) {
+        setError("Failed to fetch users"); 
+        console.error("failed to fetch data:", error)
+    } finally {
+        setLoading(false)  
+    }
+   }
 
-    return (
-        <div className="search-container">
-            <form onSubmit={handleSubmit} className="search-form">
-                <input
-                    className="search-input"
-                    type="text"
-                    value={username}
-                    onChange={handleChange}
-                    placeholder="Enter GitHub username"
-                    disabled={loading}
+  return (
+    <div>
+        <form onSubmit={handleonsubmit}>
+            <input
+                type='text'
+                className='locationinput'
+                onChange={handleonchange}
+                value={location}
+                placeholder='Enter Location of User'
+            />
+            <button
+                type='submit'
+                disabled= {loading || !location.trim()}
+            >
+                {loading ? "Searching..." : "Search"}
+            </button>
+        </form>
+
+        {loading && <div>Loading.....</div>}
+
+        {error && <div className="error">{error}</div>}  {/* ✅ Fixed */}
+
+        {users && users.map(user => (  
+            <div key={user.id} className="user-card">
+                <img 
+                    src={user.avatar_url} 
+                    alt={`${user.login}'s avatar`} 
+                    className="avatar"
                 />
-                <button 
-                    type="submit" 
-                    className="search-button"
-                    disabled={loading || !username.trim()}
-                >
-                    {loading ? "Searching..." : "Search"}
-                </button>
-            </form>
-
-            {/* Conditional Rendering */}
-            {loading && (
-                <div className="message loading">
-                    Loading...
+                <div className="user-info">
+                    <h2 className="user-name">
+                        {user.login}  {/* search API doesn't return 'name' */}
+                    </h2>
+                    <a 
+                        href={user.html_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="profile-link"
+                    >
+                        View GitHub Profile
+                    </a>
                 </div>
-            )}
+            </div>
+        ))}
+    </div>
+  )
+}
 
-            {error && (
-                <div className="message error">
-                    {error}
-                </div>
-            )}
-
-            {userData && (
-                <div className="user-card">
-                    <img 
-                        src={userData.avatar_url} 
-                        alt={`${userData.login}'s avatar`} 
-                        className="avatar"
-                    />
-                    <div className="user-info">
-                        <h2 className="user-name">
-                            {userData.name || userData.login}
-                        </h2>
-                        <p className="user-bio">
-                            {userData.bio || "No bio available"}
-                        </p>
-                        <div className="user-stats">
-                            <span>Followers: {userData.followers}</span>
-                            <span>Following: {userData.following}</span>
-                            <span>Repos: {userData.public_repos}</span>
-                        </div>
-                        <a 
-                            href={userData.html_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="profile-link"
-                        >
-                            View GitHub Profile
-                        </a>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
-
-export default Search;
+export default Search
