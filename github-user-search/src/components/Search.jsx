@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { searchUsers } from '../services/githubService'
+import { searchUsers, fetchUserData } from '../services/githubService'
 
 const Search = () => {
    const [location, setLocation] = useState("");
    const [loading, setLoading] = useState(false); 
    const [users, setUsers] = useState(null)  
    const [error, setError] = useState(null)
+   const [userDetails, setUserDetails] = useState({}) // Store detailed user data
+   const [loadingDetails, setLoadingDetails] = useState({}) // Track loading for individual users
 
    const handleonchange = (e) =>{
     setLocation(e.target.value);  
@@ -19,16 +21,74 @@ const Search = () => {
     setLoading(true);        
     setError(null);
     setUsers(null);
+    setUserDetails({}); // Clear previous details
 
     try {
         const data = await searchUsers(`location:${location}`)  
         setUsers(data.items)   // ✅ Store the array of users
+        
+        // Optionally fetch detailed data for all users immediately
+        // fetchAllUserDetails(data.items);
     } catch(error) {
         setError("Failed to fetch users"); 
         console.error("failed to fetch data:", error)
     } finally {
         setLoading(false)  
     }
+   }
+
+   // Fetch detailed user data when clicking on a user card
+   const fetchUserDetails = async (username) => {
+     if (userDetails[username]) return; // Already fetched
+
+     setLoadingDetails(prev => ({ ...prev, [username]: true }));
+     
+     try {
+        const detailedData = await fetchUserData(username);
+        setUserDetails(prev => ({ 
+          ...prev, 
+          [username]: detailedData 
+        }));
+     } catch (error) {
+        console.error(`Failed to fetch details for ${username}:`, error);
+        // You could set an error state for individual users here
+     } finally {
+        setLoadingDetails(prev => ({ ...prev, [username]: false }));
+     }
+   }
+
+   // Optional: Fetch details for all users at once
+   const fetchAllUserDetails = async (usersArray) => {
+     const details = {};
+     const loadingStates = {};
+     
+     usersArray.forEach(user => {
+       loadingStates[user.login] = true;
+     });
+     setLoadingDetails(loadingStates);
+
+     try {
+       const promises = usersArray.map(user => 
+         fetchUserData(user.login).then(data => ({ username: user.login, data }))
+       );
+       
+       const results = await Promise.all(promises);
+       
+       results.forEach(({ username, data }) => {
+         details[username] = data;
+       });
+       
+       setUserDetails(details);
+     } catch (error) {
+       console.error("Failed to fetch user details:", error);
+     } finally {
+       setLoadingDetails({});
+     }
+   }
+
+   // Handle user card click to fetch details
+   const handleUserClick = (username) => {
+     fetchUserDetails(username);
    }
 
   return (
@@ -101,38 +161,77 @@ const Search = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {users.map(user => (  
-                <div 
-                  key={user.id} 
-                  className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100"
-                >
-                  <div className="p-6">
-                    {/* Avatar and Basic Info */}
-                    <div className="flex items-center gap-4 mb-4">
-                      <img 
-                        src={user.avatar_url} 
-                        alt={`${user.login}'s avatar`} 
-                        className="w-16 h-16 rounded-full border-2 border-gray-200"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-800 truncate">
-                          {user.login}
-                        </h3>
+              {users.map(user => {  
+                const details = userDetails[user.login];
+                const isLoading = loadingDetails[user.login];
+                
+                return (
+                  <div 
+                    key={user.id} 
+                    className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
+                    onClick={() => handleUserClick(user.login)}
+                  >
+                    <div className="p-6">
+                      {/* Avatar and Basic Info */}
+                      <div className="flex items-center gap-4 mb-4">
+                        <img 
+                          src={user.avatar_url} 
+                          alt={`${user.login}'s avatar`} 
+                          className="w-16 h-16 rounded-full border-2 border-gray-200"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-semibold text-gray-800 truncate">
+                            {user.login}
+                          </h3>
+                          {details && (
+                            <p className="text-sm text-gray-600 truncate">
+                              {details.name || 'No name available'}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Profile Link */}
-                    <a 
-                      href={user.html_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                    >
-                      View Profile
-                    </a>
+                      {/* Detailed Information */}
+                      {isLoading && (
+                        <div className="flex justify-center py-2">
+                          <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
+
+                      {details && (
+                        <div className="space-y-2 mb-4">
+                          {details.bio && (
+                            <p className="text-sm text-gray-600 line-clamp-2">
+                              {details.bio}
+                            </p>
+                          )}
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span>📊 Repos: {details.public_repos}</span>
+                            <span>👥 Followers: {details.followers}</span>
+                            <span>⭐ Following: {details.following}</span>
+                          </div>
+                          {details.blog && (
+                            <p className="text-xs text-blue-600 truncate">
+                              🌐 {details.blog}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Profile Link */}
+                      <a 
+                        href={user.html_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()} // Prevent card click
+                        className="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                      >
+                        View Profile
+                      </a>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {/* Empty State */}
