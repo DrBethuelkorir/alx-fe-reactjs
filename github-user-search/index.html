@@ -4,11 +4,48 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Search for GitHub users by location or username">
-    <title>GitHub User Search</title>
+    <meta name="description" content="Search and discover GitHub users by location or username. Find developer profiles, statistics, and repository information." />
+    <meta name="keywords" content="GitHub, users, search, developers, profiles, repositories" />
+    <meta name="author" content="Your Name" />
+    
+    <!-- Open Graph Meta Tags for Social Sharing -->
+    <meta property="og:title" content="GitHub User Search" />
+    <meta property="og:description" content="Search and discover GitHub users by location or username" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Theme Color for Mobile Browsers -->
+    <meta name="theme-color" content="#6366f1" />
+    
+    <title>GitHub User Search - Find Developers & Profiles</title>
+    
+    <!-- Preload important resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <style>
+      /* Simple loading style until CSS loads */
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      }
+      
+      /* Hide content until React loads */
+      #root {
+        min-height: 100vh;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Simple loading message that disappears when React loads -->
+      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        <div style="text-align: center;">
+          <div style="font-size: 2rem; margin-bottom: 1rem;">🔍</div>
+          <h1 style="margin: 0 0 0.5rem 0; font-size: 1.5rem;">GitHub User Search</h1>
+          <p style="margin: 0; opacity: 0.8;">Loading...</p>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
