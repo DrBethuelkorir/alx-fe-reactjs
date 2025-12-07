@@ -46,13 +46,14 @@ const AddRecipeForm = () => {
     { value: 'Hard', label: 'Hard' }
   ];
 
-  // Handle input changes
+  // CORRECTED: Handle input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target; // FIXED: Using e.target.value
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    
     // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -77,7 +78,8 @@ const AddRecipeForm = () => {
 
     // Format validation for ingredients (at least 2 items)
     if (formData.ingredients.trim()) {
-      const ingredientCount = formData.ingredients.split('\n').filter(line => line.trim()).length;
+      const ingredientLines = formData.ingredients.split('\n');
+      const ingredientCount = ingredientLines.filter(line => line.trim()).length;
       if (ingredientCount < 2) {
         newErrors.ingredients = 'Please enter at least 2 ingredients';
       }
@@ -85,22 +87,27 @@ const AddRecipeForm = () => {
 
     // Format validation for instructions (at least 3 steps)
     if (formData.instructions.trim()) {
-      const instructionCount = formData.instructions.split('\n').filter(line => line.trim()).length;
+      const instructionLines = formData.instructions.split('\n');
+      const instructionCount = instructionLines.filter(line => line.trim()).length;
       if (instructionCount < 3) {
         newErrors.instructions = 'Please enter at least 3 steps';
       }
     }
 
     // Time validation (must be positive numbers)
-    if (formData.prepTime && (isNaN(formData.prepTime) || parseInt(formData.prepTime) <= 0)) {
+    const prepTimeNum = parseInt(formData.prepTime);
+    if (formData.prepTime && (isNaN(prepTimeNum) || prepTimeNum <= 0)) {
       newErrors.prepTime = 'Prep time must be a positive number';
     }
-    if (formData.cookTime && (isNaN(formData.cookTime) || parseInt(formData.cookTime) <= 0)) {
+    
+    const cookTimeNum = parseInt(formData.cookTime);
+    if (formData.cookTime && (isNaN(cookTimeNum) || cookTimeNum <= 0)) {
       newErrors.cookTime = 'Cook time must be a positive number';
     }
 
     // Servings validation
-    if (formData.servings && (isNaN(formData.servings) || parseInt(formData.servings) <= 0)) {
+    const servingsNum = parseInt(formData.servings);
+    if (formData.servings && (isNaN(servingsNum) || servingsNum <= 0)) {
       newErrors.servings = 'Servings must be a positive number';
     }
 
@@ -118,22 +125,40 @@ const AddRecipeForm = () => {
       
       // Scroll to first error
       const firstErrorField = Object.keys(newErrors)[0];
-      document.querySelector(`[name="${firstErrorField}"]`)?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
+      const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
+      if (errorElement) {
+        errorElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
       
       return;
     }
 
     setIsSubmitting(true);
 
-    // Simulate API call
     try {
-      // In a real app, you would send this data to your backend
-      console.log('Submitting recipe:', formData);
+      // Create recipe object
+      const newRecipe = {
+        id: Date.now(), // Generate unique ID
+        title: formData.title,
+        summary: formData.summary,
+        image: formData.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+        category: formData.category,
+        rating: 4.5, // Default rating
+        cookTime: `${formData.cookTime} min`,
+        difficulty: formData.difficulty,
+        author: 'You', // Current user
+        ingredients: formData.ingredients.split('\n').filter(line => line.trim()),
+        instructions: formData.instructions.split('\n').filter(line => line.trim()),
+        prepTime: `${formData.prepTime} min`,
+        servings: parseInt(formData.servings)
+      };
+
+      console.log('Submitting recipe:', newRecipe);
       
-      // Simulate network delay
+      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Show success message
@@ -203,7 +228,7 @@ const AddRecipeForm = () => {
 
         {/* Success Message */}
         {submitSuccess && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-r-lg animate-fade-in">
+          <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-r-lg">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <svg className="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -517,7 +542,7 @@ const AddRecipeForm = () => {
                     className={`flex-1 px-6 py-4 font-semibold rounded-lg transition-all ${
                       isSubmitting
                         ? 'bg-green-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                        : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl'
                     }`}
                   >
                     {isSubmitting ? (
